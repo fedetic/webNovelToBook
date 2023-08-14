@@ -1,16 +1,34 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import requests
+from bs4 import BeautifulSoup
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def scrape_articles(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    }
+
+    session = requests.Session()
+    response = session.get(url, headers=headers)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        article_div = soup.find('div', id='chr-content')
+
+        if article_div:
+            articles = article_div.find_all('h2', class_='article-title')
+
+            with open('articles.txt', 'w') as file:
+                for article in articles:
+                    title = article.text.strip()
+                    file.write(title + '\n')
+
+            print(f"{len(articles)} articles scraped and saved to 'articles.txt'.")
+        else:
+            print("No articles found within the specified div.")
+    else:
+        print("Failed to fetch the webpage.")
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    target_url = "https://#"  # Replace
+    scrape_articles(target_url)
